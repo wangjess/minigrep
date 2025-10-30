@@ -1,6 +1,9 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
+
+use minigrep::search;
 
 fn main() {
     // Collect command line arguments
@@ -11,15 +14,10 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for {}", config.query);
-    println!("In file {}", config.file_path);
-
-    let contents = fs::read_to_string(config.file_path)
-        .expect("Should have been able to read the file");
-
-    println!("With text:\n{contents}");
-
-    dbg!(args);
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
 
 struct Config {
@@ -41,9 +39,14 @@ impl Config {
     }
 }
 
-fn parse_config(args: &[String]) -> Config {
-    let query = args[1].clone();
-    let file_path = args[2].clone();
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
 
-    Config {query, file_path}
+    for line in search(&config.query, &contents) {
+        println!("{line}");
+    }
+
+    println!("With text:\n{contents}");
+
+    Ok(())
 }
