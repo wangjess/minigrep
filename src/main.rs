@@ -23,7 +23,7 @@ fn main() {
 struct Config {
     query: String,
     file_path: String,
-    ignore_case: bool
+    ignore_case: bool,
 }
 
 // Constructor
